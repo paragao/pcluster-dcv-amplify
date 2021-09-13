@@ -1,0 +1,20 @@
+type Instance 
+  @model(
+    mutations: {create: "createInstance", delete: "deleteInstance", update: "updateInstance"} 
+    subscriptions: { level: public }
+  )
+  @auth(rules: [
+    {allow: owner, ownerField:"owner", provider: userPools, operations:[read, create, delete]}
+    {allow: private, provider: userPools, operations:[read]}
+  ])
+{
+  id: ID!
+  status: String
+  name: String
+  instanceType: String!
+  instanceId: String
+  publicip: String
+  tags: [String]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
