@@ -1,6 +1,99 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const createUser = /* GraphQL */ `
+  mutation CreateUser(
+    $input: CreateUserInput!
+    $condition: ModelUserConditionInput
+  ) {
+    createUser(input: $input, condition: $condition) {
+      id
+      username
+      instances {
+        items {
+          id
+          userID
+          status
+          name
+          instanceType
+          instanceId
+          publicip
+          tags
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      costCenter
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const updateUser = /* GraphQL */ `
+  mutation UpdateUser(
+    $input: UpdateUserInput!
+    $condition: ModelUserConditionInput
+  ) {
+    UpdateUser(input: $input, condition: $condition) {
+      id
+      username
+      instances {
+        items {
+          id
+          userID
+          status
+          name
+          instanceType
+          instanceId
+          publicip
+          tags
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      costCenter
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const deleteUser = /* GraphQL */ `
+  mutation DeleteUser(
+    $input: DeleteUserInput!
+    $condition: ModelUserConditionInput
+  ) {
+    deleteUser(input: $input, condition: $condition) {
+      id
+      username
+      instances {
+        items {
+          id
+          userID
+          status
+          name
+          instanceType
+          instanceId
+          publicip
+          tags
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      costCenter
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
 export const createInstance = /* GraphQL */ `
   mutation CreateInstance(
     $input: CreateInstanceInput!
@@ -8,6 +101,7 @@ export const createInstance = /* GraphQL */ `
   ) {
     createInstance(input: $input, condition: $condition) {
       id
+      userID
       status
       name
       instanceType
@@ -27,6 +121,7 @@ export const updateInstance = /* GraphQL */ `
   ) {
     updateInstance(input: $input, condition: $condition) {
       id
+      userID
       status
       name
       instanceType
@@ -46,6 +141,7 @@ export const deleteInstance = /* GraphQL */ `
   ) {
     deleteInstance(input: $input, condition: $condition) {
       id
+      userID
       status
       name
       instanceType

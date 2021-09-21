@@ -3,14 +3,18 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Container, CssBaseline } from '@mui/material';
+
 import Amplify from 'aws-amplify';
 import awsExports from './aws-exports';
-
 Amplify.configure(awsExports);
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <CssBaseline />
+    <Container maxWidth="sm">
+      <App />
+    </Container>
   </React.StrictMode>,
   document.getElementById('root')
 );

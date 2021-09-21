@@ -21,6 +21,7 @@ RUN su node -c "npm install -g @aws-amplify/cli"
 # Install Amazon Corretto for mocking environments locally
 RUN wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -
 RUN echo 'deb https://apt.corretto.aws stable main' >>/etc/apt/sources.list.d/corretto.list
+RUN sudo apt update -y
 RUN sudo apt install -y java-11-amazon-corretto-jdk
 
 

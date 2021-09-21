@@ -1,6 +1,6 @@
 projects:
   pclusteramplified:
-    schemaPath: amplify/backend/api/pclusteramplified/build/schema.graphql
+    schemaPath: src/graphql/schema.json
     includes:
       - src/graphql/**/*.js
     excludes:
@@ -10,9 +10,6 @@ projects:
         codeGenTarget: javascript
         generatedFileName: ''
         docsFilePath: src/graphql
-        region: us-east-1
-        apiId: null
-        maxDepth: 3
 extensions:
   amplify:
     version: 3
