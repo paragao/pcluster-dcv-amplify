@@ -1,14 +1,12 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
-import Amplify, { API, graphqlOperation, Auth } from 'aws-amplify'; 
-import { createInstance, updateInstance } from './graphql/mutations'
-import { onCreateInstance } from './graphql/subscriptions'
+import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react';
-
-import { Grid, Paper, Box, Button, FormControl, MenuItem, TextField } from '@mui/material';
+import { Grid, Paper, Box, Button, Typography, MenuItem, TextField, Link, CssBaseline, Container } from '@mui/material';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
-import AppBar from './Components/AppBar.js';
-import Cards from './Components/InstanceCards.js';
+import AppBarDrawer from './Components/AppBar';
+import Cards from './Components/InstanceCards';
+import CreateInstances from './Components/CreateForm';
 
 const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
@@ -19,102 +17,74 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const lightTheme = createTheme({ palette: { mode: 'light' }});
+const darkTheme = createTheme({ palette: { mode: 'dark' }});
 
-const initialState = { 
-  instanceType: 'g4dn.xlarge'
+function Copyright(props) {
+  return (
+    <Typography variant="body2" color="text.secondary" align="center" {...props}>
+      {'Copyright © '}
+      <Link color="inherit" href="https://aws.amazon.com">
+        Amazon Web Services
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
 }
-
-const dcvInstances = [
-  { label: 'g4dn.xlarge' },
-  { label: 'g4dn.2xlarge' },
-  { label: 'g4dn.4xlarge' },
-  { label: 'g4dn.8xlarge' },
-  { label: 'g4dn.12xlarge' },
-  { label: 'g4dn.16xlarge' },
-  { label: 'g4ad.xlarge' },
-  { label: 'g4ad.2xlarge' },
-  { label: 'g4ad.4xlarge'},
-  { label: 'g4ad.8xlarge' },
-  { label: 'g4ad.16xlarge' },
-  { label: 'g3s.xlarge' },
-  { label: 'g3.4xlarge' },
-  { label: 'g3.8xlarge' },
-  { label: 'g3.16xlarge' }
-];
 
 function App() {
 
-  const [formState, setFormState] = useState(initialState)
-  const [instances, setInstances] = useState([])
-
   useEffect(() => {
-    currentUser()
   }, [])
-
-  function setInput(key, value) {
-    setFormState({ ...formState, [key]: value })
-  }
-
-  async function addInstances() { 
-    try {
-      if (!formState.instanceType) return
-      const instance = { ...formState }
-      setInstances([...instances, instance])
-      setFormState(initialState)
-      await API.graphql(graphqlOperation(createInstance, {input: instance}))
-    } catch (err) { console.log('error creating instance:', err)}
-  }
-
-  async function currentUser() {
-    const user = await Auth.currentAuthenticatedUser()
-      .then(data => setInput('userID', data.attributes.sub))
-      .catch(err => console.log(err));
-  }
 
   return (
     <>
-    <AppBar />
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <ThemeProvider theme={lightTheme}>
-          <Box
-            sx={{
-              p: 2,
-              bgcolor: 'background.default',
-              display: 'grid',
-              gap: 2,
-            }}
-          >
-            <TextField
-              id="instanceType"
-              label="Instance Type"
-              variant="outlined"
-              value={formState.instanceType}
-              onChange={event => setInput('instanceType', event.target.value)}
-            >
-              {dcvInstances.map((dcvInstance, index) => (
-                <MenuItem value={dcvInstance.label}>{dcvInstance.label}</MenuItem>
-              ))}
-            </TextField>
-            <TextField 
-              id="instanceName" 
-              label="Name" 
-              variant="outlined" 
-              onChange={event => setInput('name', event.target.value)}
-              value={formState.name}
-            />
-            <input
-              hidden
-              value={formState.userID}
-              placeholder="userID" 
-            />
-          <Button variant="contained" onClick={addInstances}>Create Instance</Button>
+    <ThemeProvider theme={darkTheme}>
+      <Box sx={{ display: 'flex' }}>
+        <CssBaseline />
+        <AppBarDrawer />
+        <Box 
+          component="main"
+          sx={{
+            backgroundColor: (theme) => 
+              theme.palette.mode === 'light'
+                ? theme.palette.grey[100]
+                : theme.palette.grey[900],
+            flexGrow: 1,
+            height: '100vh',
+            overflow: 'auto',
+          }}
+        >
+          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Paper 
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <CreateInstances />
+                </Paper>
+              </Grid>
+              <Grid item xs={12}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <Cards />
+                </Paper>
+              </Grid>
+            </Grid>
+            <Copyright sx={{ pt: 4 }} />
+          </Container>
         </Box>
-        </ThemeProvider>
-      </Grid>
-    </Grid>
-    <hr />
-    <Cards />
+      </Box>
+    </ThemeProvider>
     </>
   );
 }

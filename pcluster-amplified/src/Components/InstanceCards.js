@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Box, Card, CardActions, CardContent, Button, Typography } from '@mui/material';
+import { Grid, Paper, Link, Typography } from '@mui/material';
 import { API, graphqlOperation } from 'aws-amplify'; 
 import { listInstances } from '../graphql/queries';
 
@@ -20,29 +20,29 @@ export default function BasicCard() {
     }
 
     return (
-        <Box sx={{ flexGrow: 1 }}>
-            <Grid container spacing={3}>
-                { 
-                    instances.map((instance, index) => (
-                        <Grid item xs={4}>
-                            <Card sx={{ minWidth: 275 }}>
-                                <CardContent>
-                                    <Typography variant="h5" component="div">
-                                        {instance.name}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {instance.instanceType}
-                                        {instance.instanceId}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Button size="small">DCV access URL</Button>
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                    ))
-                }
-            </Grid>
-        </Box>
+        <Grid container spacing={3}>
+            { 
+                instances.map((instance, index) => (
+                    <Grid item key={index} xs={4}>
+                        <Paper 
+                            sx={{
+                                p: 2,
+                                display: 'flex',
+                                flexDirection: 'column',
+                            }}
+                        >
+                            <Typography variant="h5" component="div">
+                                {instance.name}
+                            </Typography>
+                            <Typography variant="body2">
+                                {instance.instanceType}
+                                {instance.instanceId}
+                            </Typography>
+                            <Link >Click to connect</Link>
+                        </Paper>
+                    </Grid>
+                ))
+            }
+        </Grid>
     );
 }

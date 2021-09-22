@@ -11,10 +11,7 @@ Amplify.configure(awsExports);
 
 ReactDOM.render(
   <React.StrictMode>
-    <CssBaseline />
-    <Container maxWidth="sm">
-      <App />
-    </Container>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );
