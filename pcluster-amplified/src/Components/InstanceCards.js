@@ -2,11 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Grid, Paper, Link, Typography } from '@mui/material';
 import { API, graphqlOperation } from 'aws-amplify'; 
 import { listInstances } from '../graphql/queries';
+import { onCreateInstance } from '../graphql/subscriptions';
 
 export default function BasicCard() {
 
     const [instances, setInstances] = useState([])
 
+    const subscription = API.graphql(graphqlOperation(onCreateInstance))
+    .subscribe({
+        next: (instanceData) => {
+            console.log(instanceData.value.data)
+            const newInstance = instanceData.value.data.onCreateInstance
+            setInstances([...instances, newInstance])
+        },
+        error: err => console.warn(err)
+    });
+    
     useEffect(() => {
         fetchInstances()
     }, [])

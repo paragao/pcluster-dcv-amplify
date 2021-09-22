@@ -75,11 +75,11 @@ export default function BasicAppBar() {
         <AppBar position="absolute" open={open}>
             <Toolbar sx={{ pr: '24px' }}>
                 <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-                onClick={toggleDrawer}
-                sx={{
+                  edge="start"
+                  color="inherit"
+                  aria-label="open drawer"
+                  onClick={toggleDrawer}
+                  sx={{
                     marginRight: '36px',
                     ...(open && { display: 'none' }),
                 }}
@@ -99,22 +99,22 @@ export default function BasicAppBar() {
             </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>
-        <Toolbar
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            px: [1],
-          }}
-        >
-          <IconButton onClick={toggleDrawer}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </Toolbar>
+          <Toolbar
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              px: [1],
+            }}
+          >
+            <IconButton onClick={toggleDrawer}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </Toolbar>
         <Divider />
-        <List>{mainListItems}</List>
+          <List>{mainListItems}</List>
         <Divider />
-        <List>{secondaryListItems}</List>
+          <List>{secondaryListItems}</List>
       </Drawer>
       </>
     );

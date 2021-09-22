@@ -2,11 +2,12 @@ import './App.css';
 import React, { useEffect, useState } from 'react';
 import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react';
-import { Grid, Paper, Box, Button, Typography, MenuItem, TextField, Link, CssBaseline, Container } from '@mui/material';
+import { Grid, Paper, Box, Typography, Link, CssBaseline, Container } from '@mui/material';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import AppBarDrawer from './Components/AppBar';
 import Cards from './Components/InstanceCards';
 import CreateInstances from './Components/CreateForm';
+
 
 const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
@@ -56,8 +57,8 @@ function App() {
           }}
         >
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4} lg={6}>
                 <Paper 
                   sx={{
                     p: 2,

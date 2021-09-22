@@ -3,6 +3,7 @@ import Amplify, { Auth, API, graphqlOperation } from 'aws-amplify';
 import { createInstance } from '../graphql/mutations'
 import { useTheme } from '@mui/material/styles';
 import { TextField, Button, MenuItem } from '@mui/material';
+import Title from './Title';
 
 const dcvInstances = [
     { value: 'g4dn.xlarge', label: '4 vCPU, 16GB RAM, 1x T4 16GB' },
@@ -58,33 +59,33 @@ export default function CreateForm() {
   }
 
   return (
-      
     <>
-        <TextField
-            id="instanceType"
-            label="Instance Type"
-            variant="outlined"
-            select
-            value={formState.instanceType}
-            onChange={event => setInput('instanceType', event.target.value)}
-            >
-            {dcvInstances.map((dcvInstance, index) => (
-                <MenuItem value={dcvInstance.value}>{dcvInstance.label}</MenuItem>
-            ))}
-        </TextField>
-        <TextField 
-            id="instanceName" 
-            label="Name" 
-            variant="outlined" 
-            onChange={event => setInput('name', event.target.value)}
-            value={formState.name}
-        />
-        <input
-            hidden
-            value={formState.userID}
-            placeholder="userID" 
-        />
-        <Button variant="contained" onClick={addInstances}>Create Instance</Button>
+      <Title>Create new instances by filling out this form: </Title>
+      <TextField
+          id="instanceType"
+          label="Instance Type"
+          variant="outlined"
+          select
+          value={formState.instanceType}
+          onChange={event => setInput('instanceType', event.target.value)}
+          >
+          {dcvInstances.map((dcvInstance, index) => (
+              <MenuItem value={dcvInstance.value} key={index}>{dcvInstance.label}</MenuItem>
+          ))}
+      </TextField>
+      <TextField 
+          id="instanceName" 
+          label="Name" 
+          variant="outlined" 
+          onChange={event => setInput('name', event.target.value)}
+          value={formState.name}
+      />
+      <input
+          hidden
+          value={formState.userID}
+          placeholder="userID" 
+      />
+      <Button variant="contained" onClick={addInstances}>Create Instance</Button>
     </>
   );
 }
