@@ -3,7 +3,6 @@ const ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
 const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 
 async function getInstanceData(params) {
-    setTimeout(() => {}, 2000);
     await ec2.describeInstances(params, function(err, data) {
         if (err) console.log(err, err.stack);
         else { 
