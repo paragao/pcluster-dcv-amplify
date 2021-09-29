@@ -18,7 +18,7 @@
       "function": {
         "createdcvserver": {
           "deploymentBucketName": "amplify-pclusteramplified-dev-231935-deployment",
-          "s3Key": "amplify-builds/createdcvserver-4d3138306274592f634c-build.zip"
+          "s3Key": "amplify-builds/createdcvserver-3876674534573239516f-build.zip"
         }
       }
     }

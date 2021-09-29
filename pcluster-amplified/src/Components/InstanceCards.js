@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Paper, Link, Typography } from '@mui/material';
+import { Grid, Paper, Button, Typography } from '@mui/material';
 import { API, graphqlOperation } from 'aws-amplify'; 
 import { listInstances } from '../graphql/queries';
 import { onCreateInstance } from '../graphql/subscriptions';
@@ -36,12 +36,35 @@ export default function BasicCard() {
     function createLink(e) {
         if (e != null) {
             return(
-                <Link 
-                    variant="button" 
-                    href={'https://' + e + ':8443'}>
-                        Click to connect
-                </Link>
+            <>
+                <Button 
+                    variant="contained" 
+                    href={'https://' + e + ':8443'}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    size="small"
+                >
+                        Connect to DCV
+                </Button>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={deleteInstance}
+                >
+                    Delete instance
+                </Button>
+            </>
             )
+        }
+    }
+
+    async function deleteInstance() {
+        try {
+            const instanceId = instanceId
+            await API.graphql(graphqlOperation(deleteInstance, {input: instanceId}))
+
+          } catch (err) { 
+
         }
     }
 

@@ -35,6 +35,11 @@ const initialState = {
     launchTemplate: ''
 }
 
+const initialSeverity = {
+  message: 'Fill out the required parameters',
+  severity: 'warning'
+}
+
 export default function CreateForm() {
   
   const theme = useTheme();
@@ -42,6 +47,7 @@ export default function CreateForm() {
   const [formState, setFormState] = useState(initialState)
   const [instances, setInstances] = useState([])
   const [snackOpen, setSnackOpen] = useState(false);
+  const [snackSeverity, setSnackSeverity] = useState(initialSeverity);
 
   useEffect(() => {
       currentUser()
@@ -57,9 +63,6 @@ export default function CreateForm() {
 
   const action = (
     <>
-      <Button color="secondary" size="small" onClick={handleClose}>
-        
-      </Button>
       <IconButton 
         size="small"
         aria-label="close"
@@ -70,6 +73,10 @@ export default function CreateForm() {
       </IconButton>
     </>
   );
+
+  function setSeverity(key, value) {
+    setSnackSeverity({ ...snackSeverity, [key]: value })
+  }
 
   function setInput(key, value) {
     setFormState({ ...formState, [key]: value })
@@ -83,13 +90,26 @@ export default function CreateForm() {
 
   async function addInstances() { 
     try {
-      if (!formState.instanceType) return
+      if (!formState.instanceType || !formState.launchTemplate) {
+        setSeverity('message', 'must fill out required parameters')
+        setSeverity('severity', 'warning')
+        setSnackOpen(true)
+        console.warn('either instanceType or launchTemplate were not defined')
+        return ('Fill out the required parameters before clicking the create instance button')
+      }
       const instance = { ...formState }
       setInstances([...instances, instance])
       setFormState(initialState)
       await API.graphql(graphqlOperation(createInstance, {input: instance}))
+      setSeverity('message', 'instance created successfully');
+      setSeverity('severity', 'success');
       setSnackOpen(true)
-    } catch (err) { console.log('error creating instance:', err)}
+    } catch (err) { 
+      console.error('error creating instance:', err)
+      setSeverity('message', 'error creating instance')
+      setSeverity('severity', 'error')
+      setSnackOpen(true)
+    }
   }
 
   return (
@@ -145,12 +165,13 @@ export default function CreateForm() {
         open={snackOpen}
         autoHideDuration={10000}
         onClose={handleClose}
-        message="instance created"
+        message={snackSeverity.message}
         action={action}
+        
         sx={{ position: 'relative', top: 0}}
       >
-        <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-          Instance created!
+        <Alert onClose={handleClose} severity={snackSeverity.severity} sx={{ width: '100%' }}>
+          {snackSeverity.message}
         </Alert>
       </Snackbar>
     </>

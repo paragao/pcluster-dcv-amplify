@@ -29,7 +29,7 @@ type Instance
   userID: ID!
   status: String
   name: String
-  launchTemplate: String
+  launchTemplate: String!
   instanceType: String!
   instanceId: String
   publicip: String
