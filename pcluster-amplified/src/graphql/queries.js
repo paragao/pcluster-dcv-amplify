@@ -12,9 +12,11 @@ export const getUser = /* GraphQL */ `
           userID
           status
           name
+          launchTemplate
           instanceType
           instanceId
           publicip
+          numberInstancesPerCall
           tags
           createdAt
           updatedAt
@@ -58,9 +60,11 @@ export const getInstance = /* GraphQL */ `
       userID
       status
       name
+      launchTemplate
       instanceType
       instanceId
       publicip
+      numberInstancesPerCall
       tags
       createdAt
       updatedAt
@@ -80,9 +84,11 @@ export const listInstances = /* GraphQL */ `
         userID
         status
         name
+        launchTemplate
         instanceType
         instanceId
         publicip
+        numberInstancesPerCall
         tags
         createdAt
         updatedAt

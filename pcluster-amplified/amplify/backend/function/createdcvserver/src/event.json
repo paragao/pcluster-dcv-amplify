@@ -1,0 +1,52 @@
+{
+    "Records": [
+        {
+            "eventID": "588984f2f6b76e838b4af10cb1068b95",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1632831194,
+                "Keys": {
+                    "id": {
+                        "S": "e90ea435-ee6f-4206-a6eb-516fc0378149"
+                    }
+                },
+                "NewImage": {
+                    "owner": {
+                        "S": "paragao"
+                    },
+                    "createdAt": {
+                        "S": "2021-09-28T12:13:13.696Z"
+                    },
+                    "__typename": {
+                        "S": "Instance"
+                    },
+                    "instanceType": {
+                        "S": "g4dn.xlarge"
+                    },
+                    "name": {
+                        "S": "new test A"
+                    },
+                    "launchTemplate": {
+                        "S": "lt-03b94cfa63f21e082"
+                    },
+                    "id": {
+                        "S": "e90ea435-ee6f-4206-a6eb-516fc0378149"
+                    },
+                    "userID": {
+                        "S": "90e1bf04-fc35-400d-83ea-672b1f48e5e8"
+                    },
+                    "updatedAt": {
+                        "S": "2021-09-28T12:13:13.696Z"
+                    }
+                },
+                "SequenceNumber": "46106900000000017450308629",
+                "SizeBytes": 285,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:441224055073:table/Instance-nck27ony2fcqtkjtxwfehgpjh4-dev/stream/2021-09-18T20:24:53.606"
+        }
+    ]
+}

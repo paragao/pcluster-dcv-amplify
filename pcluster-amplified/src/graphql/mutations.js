@@ -15,9 +15,11 @@ export const createUser = /* GraphQL */ `
           userID
           status
           name
+          launchTemplate
           instanceType
           instanceId
           publicip
+          numberInstancesPerCall
           tags
           createdAt
           updatedAt
@@ -46,9 +48,11 @@ export const updateUser = /* GraphQL */ `
           userID
           status
           name
+          launchTemplate
           instanceType
           instanceId
           publicip
+          numberInstancesPerCall
           tags
           createdAt
           updatedAt
@@ -77,9 +81,11 @@ export const deleteUser = /* GraphQL */ `
           userID
           status
           name
+          launchTemplate
           instanceType
           instanceId
           publicip
+          numberInstancesPerCall
           tags
           createdAt
           updatedAt
@@ -104,9 +110,11 @@ export const createInstance = /* GraphQL */ `
       userID
       status
       name
+      launchTemplate
       instanceType
       instanceId
       publicip
+      numberInstancesPerCall
       tags
       createdAt
       updatedAt
@@ -124,9 +132,11 @@ export const updateInstance = /* GraphQL */ `
       userID
       status
       name
+      launchTemplate
       instanceType
       instanceId
       publicip
+      numberInstancesPerCall
       tags
       createdAt
       updatedAt
@@ -144,9 +154,11 @@ export const deleteInstance = /* GraphQL */ `
       userID
       status
       name
+      launchTemplate
       instanceType
       instanceId
       publicip
+      numberInstancesPerCall
       tags
       createdAt
       updatedAt

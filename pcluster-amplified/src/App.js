@@ -8,7 +8,6 @@ import AppBarDrawer from './Components/AppBar';
 import Cards from './Components/InstanceCards';
 import CreateInstances from './Components/CreateForm';
 
-
 const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   textAlign: 'center',
@@ -58,15 +57,29 @@ function App() {
         >
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={4} lg={6}>
+              <Grid item xs={6} md={4} lg={6}>
                 <Paper 
                   sx={{
                     p: 2,
+                    mt: 4,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative'
+                  }}
+                >
+                  <CreateInstances />
+                </Paper>
+              </Grid>
+              <Grid item xs={6} md={4} lg={6}>
+                <Paper 
+                  sx={{
+                    p: 2,
+                    mt: 4,
                     display: 'flex',
                     flexDirection: 'column',
                   }}
                 >
-                  <CreateInstances />
+                  <p>placeholder</p>
                 </Paper>
               </Grid>
               <Grid item xs={12}>
@@ -89,15 +102,6 @@ function App() {
     </>
   );
 }
-
-//const styles = {
-//  container: { width: 1024, margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 20 },
-//  instance: {  marginBottom: 15 },
-//  input: { border: 'none', backgroundColor: '#ddd', marginBottom: 10, padding: 8, fontSize: 18 },
-//  instanceType: { fontSize: 20, fontWeight: 'bold' },
-//  instanceDescription: { marginBottom: 0 },
-//  button: { backgroundColor: 'black', color: 'white', outline: 'none', fontSize: 18, padding: '12px 0px' }
-//}
 
 //export default App;
 export default withAuthenticator(App);

@@ -72,7 +72,7 @@ export default function BasicAppBar() {
 
     return (
         <>
-        <AppBar position="absolute" open={open}>
+        <AppBar sx={{ position: 'absolute' }} open={open}>
             <Toolbar sx={{ pr: '24px' }}>
                 <IconButton
                   edge="start"

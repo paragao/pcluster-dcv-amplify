@@ -1,0 +1,11 @@
+{
+  "name": "createdcvserver",
+  "version": "2.0.0",
+  "description": "Create an instance out of a DynamoDB Streams",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "author": "Paulo Aragao",
+  "dependencies": {
+    "aws-sdk": "^2.995.0"
+  }
+}

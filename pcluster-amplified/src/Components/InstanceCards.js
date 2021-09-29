@@ -19,7 +19,10 @@ export default function BasicCard() {
     });
     
     useEffect(() => {
-        fetchInstances()
+        const interval = setInterval(() => {
+            fetchInstances()
+          }, 5000);
+        return () => clearInterval(interval);
     }, [])
 
     async function fetchInstances() {
@@ -27,7 +30,19 @@ export default function BasicCard() {
           const instanceData = await API.graphql(graphqlOperation(listInstances))
           const instance = instanceData.data.listInstances.items
           setInstances(instance)
-        } catch (err) { console.log('error fetching instances: ', err) }
+        } catch (err) { console.warn('error fetching instances: ', err) }
+    }
+
+    function createLink(e) {
+        if (e != null) {
+            return(
+                <Link 
+                    variant="button" 
+                    href={'https://' + e + ':8443'}>
+                        Click to connect
+                </Link>
+            )
+        }
     }
 
     return (
@@ -42,14 +57,16 @@ export default function BasicCard() {
                                 flexDirection: 'column',
                             }}
                         >
-                            <Typography variant="h5" component="div">
+                            <Typography variant="body1" component="div">
                                 {instance.name}
                             </Typography>
                             <Typography variant="body2">
                                 {instance.instanceType}
+                            </Typography>
+                            <Typography variant="body2">
                                 {instance.instanceId}
                             </Typography>
-                            <Link >Click to connect</Link>
+                            {createLink(instance.publicip)} 
                         </Paper>
                     </Grid>
                 ))
