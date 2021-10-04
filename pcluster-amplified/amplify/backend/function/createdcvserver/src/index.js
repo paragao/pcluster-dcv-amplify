@@ -5,21 +5,19 @@ const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 exports.handler = function(event, context, callback) {
     //eslint-disable-line
     console.log(JSON.stringify(event));
-    const creationSucess = false
-    const updateSucess = false
 
     event.Records.forEach(record => {
         console.log(record.eventID);
         console.log(record.eventName);
         console.log('DynamoDB Record: %j', record.dynamodb);
 
-        // DynamoDB Streams events can be INSERT, UPDATE, DELETE. Only creates an instance if INSERT a new item.
+        // DynamoDB Streams events can be INSERT, UPDATE, REMOVE. Only creates an instance if INSERT a new item.
         // Idea (TO-DO): also check if there is an OLD_IMAGE. New items don't have OLD_IMAGE
         // Verify if Amplify allows for ease configuration of not looking at NEW_AND_OLD_IMAGE and just NEW_IMAGE
-        if (record.eventName == 'INSERT') {
+        if (record.eventName === 'INSERT') {
             try {
+                console.log('INSERT event', record.dynamodb)
                 const pkId = record.dynamodb.Keys.id.S 
-                // validates if an instance with a tag 'UUID: pkid' already exists. If it does, probably a duplicate, exit. If not, carry on.
                 const params = {
                     Filters: [
                         { 
@@ -37,20 +35,16 @@ exports.handler = function(event, context, callback) {
                         }
                     ]
                 };
+                //verify if the instance already exists
                 ec2.describeInstances(params, function(err, data) {
-                    if (err) console.log(err, err.stack);
+                    if (err) console.log('error trying to find an existing instance: ', err, err.stack);
                     else {
-                        if (data.Reservations.length != 0) {
-                            console.log('Instance already exists')
+                        if (data.Reservations.length !== 0) {
                             return ('Instance already exists with the same UUID ', data)
                         } else {
-                            console.log('instance does not exist, creating it...')
-                            // create the EC2 instance if does not exist already
                             const nameTag = record.dynamodb.NewImage.name.S
                             const instanceType = record.dynamodb.NewImage.instanceType.S
                             const launchTemplate = record.dynamodb.NewImage.launchTemplate.S
-
-                            console.log('params: ', nameTag, instanceType, launchTemplate, pkId)
                             const instanceParams = {
                                 LaunchTemplate: {
                                     LaunchTemplateId: launchTemplate,
@@ -79,96 +73,86 @@ exports.handler = function(event, context, callback) {
                                     }
                                 ]
                             }
+                            // create the EC2 instance if does not exist already
                             ec2.runInstances(instanceParams, function(err, data) {
-                                if (err) console.log(err, err.stack);
+                                if (err) console.log('error creating instance: ', err, err.stack);
                                 else {
-                                    console.log('const InstanceData returned: ', data)
-                                    const instanceId = data.Instances[0].InstanceId
-                                    const creationSucess = true
-                                    
-                                    // ec2.describeInstances will not have results if you don't wait a bit
-                                    setTimeout(() => {}, 5000);
-                                    const params = { 
-                                        InstanceIds: [
-                                            instanceId
-                                        ]
-                                    }
-
-                                    // get the instance PublicIP - might take a while sometimes
-                                    ec2.describeInstances(params, function(err, data) {
-                                        if (err) console.log(err, err.stack);
-                                        else {
-                                            console.log('looking up the PublicDnsName')
-                                            const tempData = data.Reservations[0].Instances[0].PublicDnsName
-                                            console.log(tempData)
-                                            while (tempData == '') {
-                                                setTimeout(() => {}, 5000)
-                                                const data = ec2.describeInstances(params);
-                                            }
-                                            const instancePublicIp = tempData
-                                            console.log('Instance data after it was created: ', instancePublicIp)
-
-                                            // add instance additional information to DynamoDB
-                                            const table = record.eventSourceARN.split('/')[1]
-                                            console.log('Control Table: ', table)
-                                            console.log('Instance ID: ', instanceId)
-                                            console.log('PK: ', pkId)
-                                            console.log(typeof(pkId))
-                                            console.log(typeof(instanceId))
-                                            console.log(typeof(instancePublicIp))
-
-                                            ddbParams = {
-                                                ExpressionAttributeValues: {
-                                                    ":p": {
-                                                        S: instancePublicIp
-                                                    },
-                                                    ":i": {
-                                                        S: instanceId
-                                                    }
-                                                },
-                                                Key: { 
-                                                    "id": { 
-                                                        S: pkId
-                                                    }
-                                                },
-                                                TableName: table,
-                                                UpdateExpression: "SET publicip = :p, instanceId = :i"
-                                            };
-                                            ddb.updateItem(ddbParams, function(err, data) {
-                                                if (err) console.log(err, err.stack);
+                                    const instanceId = (typeof(data.Instances[0].InstanceId) !== 'undefined') ? data.Instances[0].InstanceId : false; 
+                                    if (instanceId) {
+                                        const params = { InstanceIds: [instanceId] }
+                                        // get the instance PublicIP - might take a while sometimes
+                                        setTimeout(() => {
+                                            ec2.describeInstances(params, function(err, data) {
+                                                if (err) console.log('error getting public IP: ', err, err.stack);
                                                 else {
-                                                    console.log('updated item sucessfully', data)
-                                                    const updateSucess = true
+                                                    const instancePublicIp = data.Reservations[0].Instances[0].PublicDnsName
+                                                    // add instance additional information to DynamoDB
+                                                    // TODO: change this to a call to AppSync GraphQL UpdateInstance 
+                                                    // TODO: look at Amplify Docs, Guides, Function, on how to add a layer with the mutations
+                                                    // TODO: then I can onUpdateInstance subscribe instead of multiple refreshes of the website to show the publicIP
+                                                    const table = record.eventSourceARN.split('/')[1]
+                                                    const ddbParams = {
+                                                        ExpressionAttributeValues: {
+                                                            ":p": {
+                                                                S: instancePublicIp
+                                                            },
+                                                            ":i": {
+                                                                S: instanceId
+                                                            }
+                                                        },
+                                                        Key: { 
+                                                            "id": { 
+                                                                S: pkId
+                                                            }
+                                                        },
+                                                        TableName: table,
+                                                        UpdateExpression: "SET publicip = :p, instanceId = :i"
+                                                    };
+                                                    try {
+                                                        ddb.updateItem(ddbParams, function(err, data) {
+                                                            if (err) console.log(err, err.stack);
+                                                            else {
+                                                                console.log('updated item sucessfully')
+                                                            }
+                                                        });
+                                                    } catch (err) {
+                                                        console.log('error updating DynamoDB ', err)
+                                                    }
                                                 }
-                                            });
-                                        }
-                                    });
+                                            })
+                                        }, 3000);
+                                    } else {
+                                        console.log('instanceId not set. Make sure it does not show up in the console: ', instanceId)
+                                    }
                                 }
                             })
                         }
                     }
-                })
-
-                if (creationSucess && updateSucess) {
-                    console.log('Successfully processed DynamoDB stream')
-                    return('Successfully processed DynamoDB stream')
-                } else { 
-                    console.log('some error happened...')
-                    return('some error happened...')
-                }
+                });
             } catch (err) {
                 console.log('Missed instance try/catch: ', err);
             }
         } else { 
-            console.log('not an INSERT event. Exiting...')
-            return('not an INSERT event.')
-        }
-
-        if (record.eventName == 'DELETE') {
-
-        } else { 
-            console.log('not a DELETE event. Exiting...')
-            return('not a DELETE event.')
+            if (record.eventName === 'REMOVE') {
+                console.log('delete event: ', record.dynamodb)
+                const instanceId = (typeof(record.dynamodb.OldImage.instanceId) !== 'undefined') ? record.dynamodb.OldImage.instanceId.S : null;
+                if (instanceId !== null) {
+                    const params = { InstanceIds: [instanceId] }
+                    try {
+                        ec2.terminateInstances(params, function(err, data) {
+                            if (err) console.log(err, err.stack);
+                            else console.log('instance deleted', data);
+                        });
+                    } catch (err) { 
+                        console.log('failed deleting instance ', err)
+                    }
+                } else { 
+                    console.log('no instanceId defined')
+                }
+            } else {
+                console.log('not an INSERT or REMOVE event. Exiting...')
+                return('not an INSERT or REMOVE event.')
+            }
         }
     })
 };

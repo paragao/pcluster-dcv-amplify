@@ -36,8 +36,8 @@ const initialState = {
 }
 
 const initialSeverity = {
-  message: 'Fill out the required parameters',
-  severity: 'warning'
+  message: '',
+  severity: ''
 }
 
 export default function CreateForm() {
@@ -60,6 +60,11 @@ export default function CreateForm() {
 
     setSnackOpen(false);
   };
+
+  const open = () => {
+    setSnackOpen(true)
+    setSnackSeverity(initialSeverity)
+  }
 
   const action = (
     <>
@@ -100,6 +105,7 @@ export default function CreateForm() {
       const instance = { ...formState }
       setInstances([...instances, instance])
       setFormState(initialState)
+      currentUser()
       await API.graphql(graphqlOperation(createInstance, {input: instance}))
       setSeverity('message', 'instance created successfully');
       setSeverity('severity', 'success');
@@ -148,6 +154,7 @@ export default function CreateForm() {
         label="Launch Template" 
         variant="outlined" 
         select
+        required
         onChange={event => setInput('launchTemplate', event.target.value)}
         value={formState.launchTemplate}
       >
@@ -167,7 +174,6 @@ export default function CreateForm() {
         onClose={handleClose}
         message={snackSeverity.message}
         action={action}
-        
         sx={{ position: 'relative', top: 0}}
       >
         <Alert onClose={handleClose} severity={snackSeverity.severity} sx={{ width: '100%' }}>
