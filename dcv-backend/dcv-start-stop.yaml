@@ -404,6 +404,7 @@ Resources:
                   - 'ssm:PutConfigurePackageResult'
                   - 'ssm:UpdateInstanceInformation'
                 Resource: "*" # those actions only support all resources. TODO: scope down to the account itself.
+                # Add Condition to scope down
               - Effect: Allow
                 Action: 
                   - 'ssm:GetDocument'

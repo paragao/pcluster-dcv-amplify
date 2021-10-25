@@ -1,70 +1,45 @@
-# Getting Started with Create React App
+# Front-end for AWS ParallelCluster and NICE DCV using AWS Amplify
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Contents of this README
+ * Pre-Requisites
+ * Initializing the project
+ * React project
+ * Help
 
-## Available Scripts
 
-In the project directory, you can run:
+## Pre-Requisites
+There is a Dev-Container folder. If you use VSCode, you can enable the Remote-Containers extension and open this folder in your Dev-Container. Everything that you need to start the project will be there already. 
 
-### `yarn start`
+If you don't want to use the Dev-Container, make sure you have already installed: 
+ 1. NodeJS v16 or later
+ 2. npm v5.x or later
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+You are also going to need an AWS Account. 
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
 
-### `yarn test`
+## Initializing the project
+Make sure you create an user with the right set of permissions. If you are not sure, you can start by attaching the `AdministratorAccess` policy to the user that you are going to create the credentials and then scope down using the AWS IAM Access Analyzer. 
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+First, let's configure AWS Amplify and create the credentials file. 
+```
+amplify configure
+```
 
-### `yarn build`
+Make sure you name your profile `default`.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+After you follow the prompts for creating your user and generating the AWS credentials, a file will be created for you on `${HOME}/.aws/credentials`. AWS Amplify will use those credentials when creating the backend resources on your AWS account. You can also use the same credentials on the AWS Toolkit for VSCode. If you are using the Dev-Container, the extension is already installed for you and you just have to choose your profile on the lower right bar of VSCode.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## React project
+This is a web site project based on React that will help you manage a fleet of DCV Servers. The resources needed to configure NICE DCV were already deployed using the AWS Cloudformation template provided. Make sure you have successfully deployed the basic resources before you continue.
 
-### `yarn eject`
+## Enhancing the project
+You can benefit from local mocking of the API endpoint in order to speed up development. In order to do that, make any changes you want to your GraphQL schema (usually placed in `amplify/backend/api/pclusteramplified/schema.graphql`) and then run the command:
+```
+amplify mock api
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+This will start a local endpoint on port `20002`. Just point your browser to [`http://localhost:20022`](http://localhost:20022). 
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Help
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
