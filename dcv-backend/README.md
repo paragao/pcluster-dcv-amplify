@@ -8,7 +8,7 @@ This solution was created based on a customer feedback, and it integrates many o
 &nbsp;
 
 
-In the next sections I will go through the steps required to run this demo, and explain a bit of how it is setup. Before you run this demo, either make sure you have setup the solution following the steps below or that you have deployed in by using the AWS CloudFormation stack provided [here](https://www.github.com/paragao/pcluster-dcv-amplify/backend/dcv-start-stop.yaml) 
+In the next sections I will go through the steps required to run this demo, and explain a bit of how it is setup. Before you run this demo, either make sure you have setup the solution following the steps below or that you have deployed in by using the AWS CloudFormation stack provided [here](https://www.github.com/paragao/pcluster-dcv-amplify/dcv-backend/dcv-start-stop.yaml) 
 
 The AWS CloudFormation template takes the following parameters:
  1. `Security Group` to associate with the instances being created. Make sure this Security Group allows inbound traffic on TCP port 8443, which is the default NICE DCV port;
