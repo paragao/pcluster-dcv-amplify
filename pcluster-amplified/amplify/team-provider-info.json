@@ -19,6 +19,14 @@
         "createdcvserver": {
           "deploymentBucketName": "amplify-pclusteramplified-dev-231935-deployment",
           "s3Key": "amplify-builds/createdcvserver-3876674534573239516f-build.zip"
+        },
+        "pclusteramplifiedgraphqlsharedlayer": {
+          "deploymentBucketName": "amplify-pclusteramplified-dev-231935-deployment",
+          "s3Key": "amplify-builds/pclusteramplifiedgraphqlsharedlayer-LambdaLayerVersion50052d8e-build.zip"
+        },
+        "crudoperations": {
+          "deploymentBucketName": "amplify-pclusteramplified-dev-231935-deployment",
+          "s3Key": "amplify-builds/crudoperations-7752514f436953516d7a-build.zip"
         }
       }
     }

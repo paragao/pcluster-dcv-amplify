@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "api": {
+      "pclusteramplified": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    }
+  },
+  "lambdaLayers": [
+    {
+      "type": "ProjectLayer",
+      "resourceName": "pclusteramplifiedgraphqlsharedlayer",
+      "env": "dev",
+      "version": "Always choose latest version",
+      "isLatestVersionSelected": true
+    }
+  ]
+}

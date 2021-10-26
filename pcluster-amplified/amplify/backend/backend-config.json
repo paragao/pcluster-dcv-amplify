@@ -56,6 +56,33 @@
           ]
         }
       ]
+    },
+    "pclusteramplifiedgraphqlsharedlayer": {
+      "providerPlugin": "awscloudformation",
+      "service": "LambdaLayer",
+      "build": true
+    },
+    "crudoperations": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "dependsOn": [
+        {
+          "category": "api",
+          "resourceName": "pclusteramplified",
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "pclusteramplifiedgraphqlsharedlayer",
+          "attributes": [
+            "Arn"
+          ]
+        }
+      ]
     }
   },
   "hosting": {

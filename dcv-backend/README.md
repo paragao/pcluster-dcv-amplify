@@ -1,55 +1,36 @@
 # Demo - Managed DCV solution (backend)
-&nbsp;
-
-&nbsp;
 
 This demo delivers a portal that will allow users to log in using Amazon Cognito and manage their NICE DCV instances on AWS. It uses automation through AWS Systems Manager in order to scan for idling connections and stop the servers. It also allows customers to list all DCV instances running, stopped, and terminated. And it allows users to start their DCV Sessions right from the portal. 
 
 This is by far a complete thorough solution. This demos allows customer to grasp how easy it is to managed Windows-based DCV instances when not using solutions such as Amazon AppStream or AWS ParallelCluster. It supports Linux-based DCV instances as well, as those not running with GPU. But for Linux-based instances I would suggest customers investigate this workshop [here](https://dcv-batch.workshop.aws/) which explains how to use AWS Batch to spin up Linux-based DCV instances on containers, using Spot instances, and managing the lifecycle of the instances automatically. 
 
-This solution was created based on a customer feedback, and it integrates many of this specific customer's needs. I am more than happy to hear from other customers, and fellow colleagues, to learn how to improve the solution. Also, feel free to clone it/fork it and develop you own. 
+This solution was created based on a customer feedback, and it integrates many of this specific customer's needs. I am more than happy to hear from other customers, and fellow colleagues, to learn how to improve the solution. Also, feel free to clone it/fork it and develop your own. 
 &nbsp;
 
-> DISCLAIMER: 
-> 
-> This solution has been developed as a POC for a customer, it is not intended to run in production, nor it is an official AWS solution. All the services used here will have AWS support as > standalones services. 
 
-&nbsp;
+In the next sections I will go through the steps required to run this demo, and explain a bit of how it is setup. Before you run this demo, either make sure you have setup the solution following the steps below or that you have deployed in by using the AWS CloudFormation stack provided [here](https://www.github.com/paragao/pcluster-dcv-amplify/backend/dcv-start-stop.yaml) 
 
-In the next sections I will go through the steps required to run this demo, and explain a bit of how it is setup. Before you run this demo, either make sure you have setup the solution following the steps below or that you have deployed in by using the AWS CloudFormation stack provided [here](https://code.amazon.com) 
+The AWS CloudFormation template takes the following parameters:
+ 1. `Security Group` to associate with the instances being created. Make sure this Security Group allows inbound traffic on TCP port 8443, which is the default NICE DCV port;
+ 2. `EC2 Key Pair` which will be used to decrypt the default Windows password created on instance creation. You can also modify the Launch Template after the template was deployed and either domain join the AMI or customize the AMI with additional parameters, such as a default password, by using the [EC2 LaunchV2](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch-v2.html);
+ 3. `Instance` to explicit define which instance type to be used on the Launch Template. If you are launching EC2 instances using either the frontend provided in this project, or via the Amazon EC2 RunInstances API call, you can override that value;
+ 4. `Minutes` to define the amount of minutes that the SSM Maintenance Window will run. Similar to a cron job;
+ 5. `Tag` and `Tag Value` are used by the SSM Maintenance Window to identify which instances it should target. Make sure you **do not use** an existing tag/value since that would also target those other instances;
+ 6. `Action` to define if the instance will either be stopped or terminated when idle.
+ &nbsp; 
 
-&nbsp;
-## Step 1: Show the services used and how they are configured
 ***
 
-### EC2 & Resource Groups
-
-
- 1. Go to EC2 dashboard, start up some DCV instances
-   1. You can do that by Launching an instance with a NICE DCV AMI from the AWS Marketplace
- 2. Add a tag with Key = DCV and Value = Yes. This will be the tag you use in the Resource Group.
- 3. Show the instance have the Tag DCV:Yes. This is defined in a Resource Group. 
- 4. Go to the Resource Group dashboard and show how to create a Resource Group.
-   1. Make sure you create a Resource Group that by group AWS::EC2::Instances and look for Tag:DCV=Yes
- 5. Go back to the EC2 dashboard and launch a new EC2 using the LaunchTemplate
-&nbsp;
-
-### Launch Templates
-
-
-  1. Go to the Amazon EC2 console, and click on Launch Templates
-  2. Create a Launch Template and make sure you include the following: 
-    1. The AMI you have created from the DCV Server instance you have started in the previous section
-    2. 
-&nbsp;
-
 ### AWS SSM Maintenance Window & AWS SSM Document
+This solution relies heavily on AWS Systems Manager in order to run a script that will either stop or shutdown the DCV instance. It combines SSM Documents being called by a SSM RunCommand API based on a cron job scheduled by SSM Maintenance Window.
 
+You can view the SSM Document created, as well as the SSM Maintenance Window, by going to the [AWS Systems Manager console](https://console.aws.amazon.com/systems-manager)
 
- 1. Go to the AWS SSM console
- 2. Go to Document (bottom of menu)
- 3. Create a new Document and copy/paste the code below
+Below is the code that was implement on the SSM Document. As you can see, it is a Powershell script hence it will only work on Windows. For Linux, please write your own SSM Document and associate with Linux based instances. 
 
+The script is simple: it start by checking if there are active connections to the DCV server by listing them using the DCV CLI, then it waits a bit in order to check if anyone will connect and avoid spinning up/down instance too fast, and then if noone connects after a certain amount of time it sends a message to a topic which calls an AWS Lambda function to either stop or terminate the instance.
+
+If you want the script to loop less, or wait a different amount of time, feel free to change the timers. 
 
 ```
  ---
@@ -97,56 +78,11 @@ mainSteps:
     runCommand:
     - "{{ commands }}" 
 ```
-
-
- 4. Now go to the Maintenance Window (on the left hand menu) and create a Maintenance Window
- 5. Add the Command Document you just created to the Maintenance Window, under Tasks
- 6. Choose as Targets the Resource Group you just created
 &nbsp;
 
-## Step 2: Run the API to create an instance 
-***
-
-  1. Open Postman
-  2. Run the API RunInstances
-  3. Run the API DescribeInstances
-  4. Make sure your Security Groups have the port 8443 opened for your IP address
+## Creating NICE DCV instances programmaticaly
+You can either create DCV instances on the [Amazon EC2 console](https://console.aws.amazon.com/ec2) or by calling the Amazon EC2 API RunInstances. An example can be found here.
 &nbsp;
 
-## Step 3: Access the instance using the native DCV client and web browser
-***
-
-  1. If you have the native DCV client installed in your machine, use it to connect to the instance
-    1. The IP address is the one you got by running the DescribeInstance API
-  2. Navigate a bit, talk about DCV features
-    1. Show how to transfer files from your machine to the client
-    2. Show how you can copy/paste (native client)
-    3. Show how to see latency and change the responsiveness/quality of the session
-    4. Open a second window and show multiple displays
-    5. Discuss any other feature that your customer might be instered in
-  3. After you do everything using the native DCV client, let it open and use the browser to connect a second client to the same session. Show the customer how you can allow users to collaborate by sharing a single session without disconnecting them.
-  4. Make sure you also demonstrate how you can use a browser to use DCV, without requiring a native client installed
-    1. Discuss the limitations, such as the copy/paste differences
-&nbsp;
-
-## Step 4: Show how Maintenance Windows works
-***
-
-  1. After you disconnect (make sure you disconnected) go back to the AWS console
-  2. Go to SSM and click on Maintenance Window
-  3. Look at the Maintenance Windows executions and that the script detect that there was an active session and did not turn off the intsance
-  4. While you wait a bit for the Maintenance Window to run again and turn off the instance (now that you are not connected anymore), go to the Amazon SNS console and show the topic you have created
-  5. Then click on the lambda function that is subscribed to the topic
-  6. Show the code and explains that for the sake of this PoC it is a simple code that calls StopInstance, but that is flexible enough and simple to customize the way the customer requires
-  7. Finally, discuss how DCV can also be configured on the DCV Server itself, for example, setting idle timeouts that will automatically disconnect users, alarm windows that will alert an user when it is getting close to the session timeout (so they might interact with the session and avoid being disconnected), and any other DCV feature your customer might require.
-  8. After the specified amount of time (usually 10 minutes), the Maintenance Window will execute again and will detect that there are no running sessions and stop the instance
-  9. Go back to the Amazon EC2 panel and show that the server has been shutdown
-&nbsp;
-
-## Step 5: Discuss any other topic your customer might want to discuss
-***
-
-  1. I hope this has been a good demo, and that it helped understanding how you can create a custom solution that will spin up/down DCV servers.
-  2. If you require more details about DCV, have additional questions, or anything related to DCV, please find a lot of experts in the Slack channel #dcv-interest 
-  3. If this demo helped you, please take a minute and either drop me an email or send a message directly to my manager (please, check who he/she/they in Phone Tool)
-&nbsp;
+## Acessing the NICE DCV instances
+Make sure your security groups are open on port 8443 for the appropriate CIDR range or specific IP. NICE DCV by default sign its own SSL certificate, so expect to get a warning which you can safely ignore. 

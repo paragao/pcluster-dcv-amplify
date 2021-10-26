@@ -44,6 +44,12 @@ Parameters:
     Type: String 
     Default: "Yes"
     AllowedPattern: "^[a-zA-Z0-9]*$"
+  Action:
+    Type: String
+    Default: stopInstance
+    AllowedValues: 
+      - stopInstance
+      - terminateInstance
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -63,6 +69,10 @@ Metadata:
           - Tag 
           - TagValue
           - Minutes
+      - Label:
+          default: 'AWS Lambda Environment Variable'
+        Parameters:
+          - Action
     ParameterLabels:
       EC2KeyPair:
         default: EC2 Key Pair to decode the Windows password
@@ -76,39 +86,43 @@ Metadata:
         default: Name of the Tag that will be monitored by the solution 
       TagValue:
         default: Value of the Tag that will be monitored by the solution 
+      Action:
+        default: Should Stop or Terminate instances when idle?
 
 Mappings:
-  DCVServer:
+  DCVServer: ## last update 2021-10-26
     us-east-1:
-      "HVM64": ami-05f5825affeec78e9
+      "HVM64": ami-045d4d13f489439a2
     us-east-2:
-      "HVM64": ami-05c85de49cdb0ce40
+      "HVM64": ami-00bf94f338d214470
     us-west-1:
-      "HVM64": ami-0af3c3830a0d0d567
+      "HVM64": ami-00493e347ecc5291c
     us-west-2:
-      "HVM64": ami-019ff0a55b514e755
+      "HVM64": ami-053f7f184071920af
     eu-north-1:
-      "HVM64": ami-0bdfd5a2e10328d8d
+      "HVM64": ami-075318ab63fd9ea12
     ap-south-1:
-      "HVM64": ami-0c2a5e20ed035feca
+      "HVM64": ami-0dac00757d3028cfc
     eu-west-3:
-      "HVM64": ami-04e9155e27944d4e0
+      "HVM64": ami-05a753079a82dff60
     eu-west-2:
-      "HVM64": ami-045be6886a93c8130
+      "HVM64": ami-092acaf972e3d5c50
     eu-west-1:
-      "HVM64": ami-0547e6987ff6a09e6
+      "HVM64": ami-00f427ee60aff2cef
     ap-northeast-2:
-      "HVM64": ami-0a8e306e2265fbd90
+      "HVM64": ami-013ab9c597a4f1b98
     ap-northeast-1:
-      "HVM64": ami-0a651db9a351a96a6
+      "HVM64": ami-058767e4ed89104d4
     ap-southeast-1:
-      "HVM64": ami-05a42cd504e9d2f85
+      "HVM64": ami-065a0888182bf6243
     ap-southeast-2:
-      "HVM64": ami-0b0154d9daba62781
+      "HVM64": ami-0b29148c6c117c6e9
     eu-central-1:
-      "HVM64": ami-0aa4f904d736d1114
+      "HVM64": ami-0593516fc586441b6
     sa-east-1:
-      "HVM64": ami-0bebd725a3c8b578f
+      "HVM64": ami-020b5ef016db35c9a
+    ca-central-1:
+      "HVM64": ami-077008f20bbef0eb4
 
 Resources:
   # SSM Document to start the DCV Monitor inside the instance - must be run every time an instance start
@@ -213,10 +227,14 @@ Resources:
   DCVStopInstanceLambda:
     Type: AWS::Lambda::Function
     Properties:
+      Environment:
+        Variables:
+          ACTION: !Ref Action
       Code:
         ZipFile: |
           import json
           import boto3
+          import os
 
           ec2 = boto3.client('ec2')
           ddb = boto3.client('dynamodb')
@@ -252,6 +270,8 @@ Resources:
                   }                  
 
           def lambda_handler(event, context):
+              action = os.environ['ACTION']
+              
               if ('instanceId' in event):
                   # message from SSM is actually a string within a JSON key, need to transform into JSON
                   instance_id = json.loads(event['Records'][0]['Sns']['Message'])['instanceId']        
@@ -261,13 +281,22 @@ Resources:
                   print(instance_id)
               
               # choose between terminating or stopping the instances
-              # stopDcvInstance(instance_id)
-              terminateDcvInstance(instance_id)
+              try:
+                if (action == 'stopInstance'):
+                 stopDcvInstance(instance_id)
+                elif (action == 'terminateInstance'):
+                  terminateDcvInstance(instance_id)
+                else:
+                  print('Instance action not known')
+              except:
+                print('could not call EC2 action. Exiting')
+              else: 
+                print('action taken: %', action)
 
-              return {
-                  'statusCode': '200',
-                  'body': 'Instance stopped succesfully'
-              }
+            return {
+              'statusCode': '200',
+              'body': 'Instance stopped succesfully'
+            }              
 
       FunctionName: 'manage-dcv-instance'
       Handler: index.lambda_handler
