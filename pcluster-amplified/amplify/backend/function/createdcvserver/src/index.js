@@ -2,6 +2,20 @@ const AWS = require("aws-sdk");
 const ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
 const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 
+function getInstanceDetail(params) {
+    
+    try {
+        ec2.describeInstances(params, function(err, data) {
+            if (err) console.log('error trying to find an existing instance: ', err, err.stack);
+            else { (data.Reservations.length !== 0) ? console.log('Instance already exists with the same UUID ', data) : createInstance(params) }
+        });
+    } catch (err) {
+        console.log('failed describing instances')
+    }
+
+}
+
+
 exports.handler = function(event, context, callback) {
     //eslint-disable-line
     console.log(JSON.stringify(event));

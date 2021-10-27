@@ -1,0 +1,238 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Simple solution to start/stop DCV instances based an AWS SSM Maintenance Window workflow
+
+Parameters: 
+  InstancesTable:
+    Value: String
+  
+Resources: 
+  WorkFlowCreateDcvServer:
+    Type: AWS::StepFunctions::StateMachine
+    Properties: 
+      DefinitionString: |-
+        {
+          "Comment": "Managed DCV - creates instance",
+          "StartAt": "VerifyInstanceExist",
+          "States": {
+            "VerifyInstanceExist": {
+              "Type": "Task",
+              "Parameters": {},
+              "Resource": "arn:aws:states:::aws-sdk:ec2:describeInstances",
+              "InputPath": "$.pkid",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "BackoffRate": 1,
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2
+                }
+              ],
+              "Next": "Choice",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "Next": "Fail"
+                }
+              ],
+              "ResultPath": "$.pkid"
+            },
+            "Choice": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Not": {
+                    "Variable": "$.response",
+                    "NumericGreaterThan": 0
+                  },
+                  "Next": "CreateDcvServer"
+                },
+                {
+                  "Variable": "$.response",
+                  "NumericGreaterThan": 0,
+                  "Next": "Success"
+                }
+              ]
+            },
+            "CreateDcvServer": {
+              "Type": "Task",
+              "Parameters": {
+                "MaxCount": 1234,
+                "MinCount": 1234
+              },
+              "Resource": "arn:aws:states:::aws-sdk:ec2:runInstances",
+              "Next": "Wait",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "Next": "Fail"
+                }
+              ]
+            },
+            "Wait": {
+              "Type": "Wait",
+              "Seconds": 3,
+              "Next": "GetInstancePublicIp"
+            },
+            "GetInstancePublicIp": {
+              "Type": "Task",
+              "Parameters": {},
+              "Resource": "arn:aws:states:::aws-sdk:ec2:describeInstances",
+              "InputPath": "$.instanceId",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "BackoffRate": 1,
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2
+                }
+              ],
+              "Next": "DynamoDB UpdateItem",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "Next": "Fail"
+                }
+              ]
+            },
+            "DynamoDB UpdateItem": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::dynamodb:updateItem",
+              "Parameters": {
+                "TableName": "{$TableName}",
+                "Key": {
+                  "Column": {
+                    "S.$": "$.pkid"
+                  }
+                },
+                "UpdateExpression": "SET publicip = :ip, instanceId = :instance ",
+                "ExpressionAttributeValues": {
+                  ":ip": {
+                    "S.$": "$.publicip"
+                  },
+                  ":instance": {
+                    "S.$": "$.instanceId"
+                  }
+                }
+              },
+              "Next": "Success",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "Next": "Fail"
+                }
+              ]
+            },
+            "Fail": {
+              "Type": "Fail",
+              "Error": "GenericError",
+              "Cause": "something happened in one of the states"
+            },
+            "Success": {
+              "Type": "Succeed"
+            }
+          }
+        }
+      DefinitionSubstitutions: 
+        TableName: !Ref InstancesTable
+      LoggingConfiguration: 
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !Ref WorkFlowLogGroup.Arn
+        IncludeExecutionData: true
+      RoleArn: !Ref WorkFlowRole
+      Tags:
+        - Key: 
+          Value:
+        - Key: 
+          Value: 
+      TracingConfiguration: 
+        Enabled: true
+    DependsOn: 
+      - !Ref WorkFlowLogGroup
+      - !Ref WorkFlowRole
+  
+  WorkFlowLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: '/aws/vendedlogs/step-functions/managed-dcv-solution'
+      RetentionDays: 7
+
+  WorkFlowRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument: 
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+      Description: 
+      Policies:
+        - PolicyName: !Sub "Allow_EC2_Actions_StepFunctions-${AWS::StackId}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ec2:RunInstances"
+                  - "ec2:DescribeInstances"
+                Resource: "*" # Scope down!
+        - PolicyName: !Sub "DynamoDBTableContentScoped-${AWS::StackId}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "dynamodb:GetItem"
+                  - "dynamodb:PutItem"
+                  - "dynamodb:UpdateItem"
+                  - "dynamodb:DeleteItem"
+                Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${TableName}"
+        - PolicyName: !sub "XRayScopedDown-${AWS::StackId}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "xray:PutTraceSegments"
+                  - "xray:PutTelemetryRecords"
+                  - "xray:GetSamplingRules"
+                  - "xray:GetSamplingTargets"
+                Resource: !Sub "arn:${AWS::Partition}:xray:${AWS::Region}:${AWS::AccountId}:*" # Scope down!
+        - PolicyName: !Sub "CloudWatchLogsDeliveryFullAccess-${AWS:StackId}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "logs:CreateLogDelivery"
+                  - "logs:GetLogDelivery"
+                  - "logs:UpdateLogDelivery"
+                  - "logs:DeleteLogDelivery"
+                  - "logs:ListLogDelivery"
+                  - "logs:PutResourcePolicy"
+                  - "logs:DescribeResourcePolicies"
+                  - "logs:DescribeLogGroups"
+                Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:*" # Scope down!
+
+Outputs:
+  StateMachineName:
+    Value: !Ref WorkFlowCreateDcvServer
+  WorkFlowIAMRole: 
+    Value: !Ref WorkFlowRole
+
+

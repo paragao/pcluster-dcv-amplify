@@ -2,7 +2,17 @@
 
 # [Choice] Node.js version: 16, 14, 12
 ARG VARIANT="16-buster"
-FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
+FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT} AS baseos
+
+# Install AWS Amplify && install Amazon Corretto for mocking environments locally
+RUN su node -c "npm install -g @aws-amplify/cli" 
+RUN  wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add - \
+    && echo 'deb https://apt.corretto.aws stable main' >>/etc/apt/sources.list.d/corretto.list \
+    && sudo apt update -y \
+    && sudo apt install -y java-11-amazon-corretto-jdk 
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \ 
+    && sudo ./aws/install 
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -14,15 +24,3 @@ FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
 
 # [Optional] Uncomment if you want to install more global node modules
 # RUN su node -c "npm install -g <your-package-list-here>"
-
-# Install AWS Amplify
-RUN su node -c "npm install -g @aws-amplify/cli"
-
-# Install Amazon Corretto for mocking environments locally
-RUN wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -
-RUN echo 'deb https://apt.corretto.aws stable main' >>/etc/apt/sources.list.d/corretto.list
-RUN sudo apt update -y
-RUN sudo apt install -y java-11-amazon-corretto-jdk
-
-
-
