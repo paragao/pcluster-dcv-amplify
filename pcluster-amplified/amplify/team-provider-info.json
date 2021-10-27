@@ -18,9 +18,6 @@
       "function": {
         "createdcvserver": {
           "deploymentBucketName": "amplify-pclusteramplified-dev-231935-deployment",
-<<<<<<< HEAD
-          "s3Key": "amplify-builds/createdcvserver-796c727937424e433775-build.zip"
-=======
           "s3Key": "amplify-builds/createdcvserver-73557472443172394c63-build.zip"
         },
         "pclusteramplifiedgraphqlsharedlayer": {
@@ -30,7 +27,6 @@
         "crudoperations": {
           "deploymentBucketName": "amplify-pclusteramplified-dev-231935-deployment",
           "s3Key": "amplify-builds/crudoperations-7752514f436953516d7a-build.zip"
->>>>>>> refactor_lambda
         }
       }
     }
