@@ -8,16 +8,6 @@ import { onCreateInstance } from '../graphql/subscriptions';
 export default function BasicCard() {
 
     const [instances, setInstances] = useState([])
-
-    const subscription = API.graphql(graphqlOperation(onCreateInstance))
-    .subscribe({
-        next: (instanceData) => {
-            console.log(instanceData.value.data)
-            const newInstance = instanceData.value.data.onCreateInstance
-            setInstances([...instances, newInstance])
-        },
-        error: err => console.warn(err)
-    });
     
     useEffect(() => {
         fetchInstances();
@@ -26,7 +16,18 @@ export default function BasicCard() {
         //  }, 5000);
         //return () => clearInterval(interval);
     }, [])
+    
+    const subscription = API.graphql(graphqlOperation(onCreateInstance))
+    .subscribe({
+        next: (instanceData) => {
+            console.log(instanceData.value.data)
+            const newInstance = instanceData.value.data.onCreateInstance
+            setInstances([...instances, newInstance])
 
+        },
+        error: err => console.warn(err)
+    });
+    
     async function fetchInstances() {
         try {
           const instanceData = await API.graphql(graphqlOperation(listInstances))
@@ -65,9 +66,8 @@ export default function BasicCard() {
 
     async function delInstance(id) {
         try {
-            console.log('delete instanceId: ', id)
             const deleteResponse = await API.graphql(graphqlOperation(deleteInstance, {input: { id } }))
-            console.log(deleteResponse);
+            console.log('instance deleted from DynamoDB successfully');
           } catch (err) { 
             console.warn('error deleting instance: ', err)
         }

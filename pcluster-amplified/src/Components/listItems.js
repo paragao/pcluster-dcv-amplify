@@ -18,6 +18,13 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Dashboard" />
     </ListItem>
+
+  </div>
+);
+
+export const secondaryListItems = (
+  <div>
+    <ListSubheader inset><i>(under development)</i></ListSubheader>
     <ListItem button>
       <ListItemIcon>
         <ShoppingCartIcon />
@@ -30,12 +37,6 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Cost Manager" />
     </ListItem>
-  </div>
-);
-
-export const secondaryListItems = (
-  <div>
-    <ListSubheader inset>AWS Parallel Cluster <br /><i>(under development)</i></ListSubheader>
     <ListItem button>
       <ListItemIcon>
         <AssignmentIcon />
