@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Grid, Paper, Button, Typography } from '@mui/material';
 import { API, graphqlOperation } from 'aws-amplify'; 
 import { listInstances } from '../graphql/queries';
+import { deleteInstance } from '../graphql/mutations';
 import { onCreateInstance } from '../graphql/subscriptions';
 
 export default function BasicCard() {
@@ -19,10 +20,11 @@ export default function BasicCard() {
     });
     
     useEffect(() => {
-        const interval = setInterval(() => {
-            fetchInstances()
-          }, 5000);
-        return () => clearInterval(interval);
+        fetchInstances();
+        //const interval = setInterval(() => {
+        //    fetchInstances()
+        //  }, 5000);
+        //return () => clearInterval(interval);
     }, [])
 
     async function fetchInstances() {
@@ -34,12 +36,15 @@ export default function BasicCard() {
     }
 
     function createLink(e) {
-        if (e != null) {
+        console.log(e)
+        if (e.publicip != null) {
+            const publicip = e.publicip
+            const itemId = e.id
             return(
             <>
                 <Button 
                     variant="contained" 
-                    href={'https://' + e + ':8443'}
+                    href={'https://' + publicip + ':8443'}
                     target="_blank" 
                     rel="noopener noreferrer"
                     size="small"
@@ -49,7 +54,7 @@ export default function BasicCard() {
                 <Button
                     variant="outlined"
                     size="small"
-                    onClick={deleteInstance}
+                    onClick={() => delInstance(itemId)}
                 >
                     Delete instance
                 </Button>
@@ -58,13 +63,13 @@ export default function BasicCard() {
         }
     }
 
-    async function deleteInstance() {
+    async function delInstance(id) {
         try {
-            const instanceId = instanceId
-            await API.graphql(graphqlOperation(deleteInstance, {input: instanceId}))
-
+            console.log('delete instanceId: ', id)
+            const deleteResponse = await API.graphql(graphqlOperation(deleteInstance, {input: { id } }))
+            console.log(deleteResponse);
           } catch (err) { 
-
+            console.warn('error deleting instance: ', err)
         }
     }
 
@@ -89,7 +94,7 @@ export default function BasicCard() {
                             <Typography variant="body2">
                                 {instance.instanceId}
                             </Typography>
-                            {createLink(instance.publicip)} 
+                            {createLink(instance)} 
                         </Paper>
                     </Grid>
                 ))
