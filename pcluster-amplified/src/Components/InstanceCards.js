@@ -3,7 +3,7 @@ import { Grid, Paper, Button, Typography } from '@mui/material';
 import { API, graphqlOperation } from 'aws-amplify'; 
 import { listInstances } from '../graphql/queries';
 import { deleteInstance } from '../graphql/mutations';
-import { onCreateInstance } from '../graphql/subscriptions';
+import { onCreateInstance, onDeleteInstance, onUpdateInstance } from '../graphql/subscriptions';
 
 export default function BasicCard() {
 
@@ -17,7 +17,7 @@ export default function BasicCard() {
         //return () => clearInterval(interval);
     }, [])
     
-    const subscription = API.graphql(graphqlOperation(onCreateInstance))
+    const onCreateInstanceSubscription = API.graphql(graphqlOperation(onCreateInstance))
     .subscribe({
         next: (instanceData) => {
             console.log(instanceData.value.data)
@@ -28,6 +28,28 @@ export default function BasicCard() {
         error: err => console.warn(err)
     });
     
+    const onDeleteInstanceSubscription = API.graphql(graphqlOperation(onDeleteInstance))
+    .subscribe({
+        next: (instanceData) => {
+            console.log(instanceData.value.data)
+            //const newInstance = instanceData.value.data.onCreateInstance
+            //setInstances([...instances, newInstance])
+
+        },
+        error: err => console.warn(err)
+    });
+
+    const onUpdateInstanceSubscription = API.graphql(graphqlOperation(onUpdateInstance))
+    .subscribe({
+        next: (instanceData) => {
+            console.log(instanceData.value.data)
+            //const newInstance = instanceData.value.data.onCreateInstance
+            //setInstances([...instances, newInstance])
+
+        },
+        error: err => console.warn(err)
+    });
+
     async function fetchInstances() {
         try {
           const instanceData = await API.graphql(graphqlOperation(listInstances))
