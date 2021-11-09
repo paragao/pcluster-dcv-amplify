@@ -26,29 +26,27 @@ export default function BasicCard() {
             console.log(instanceData.value.data)
             const newInstance = instanceData.value.data.onCreateInstance
             setInstances([...instances, newInstance])
-
         },
-        error: err => console.warn(err)
+        error: err => console.warn('error subscribing to onCreateInstance: ', err)
     });
     
     const onDeleteInstanceSubscription = API.graphql(graphqlOperation(onDeleteInstance))
     .subscribe({
         next: (instanceData) => {
-            console.log(instanceData.value.data)
+            console.log('onDeleteInstance value: ', instanceData.value.data)
+            //const fewerInstances = instances.delete()
             //const newInstance = instanceData.value.data.onCreateInstance
             //setInstances([...instances, newInstance])
-
         },
-        error: err => console.warn(err)
+        error: err => console.warn('error subscribing to onDeleteInstance: ', err)
     });
 
     const onUpdateInstanceSubscription = API.graphql(graphqlOperation(onUpdateInstance))
     .subscribe({
         next: (instanceData) => {
-            console.log(instanceData.value.data)
+            console.log('onUpdateInstance value: ', instanceData.value.data)
             //const newInstance = instanceData.value.data.onCreateInstance
             //setInstances([...instances, newInstance])
-
         },
         error: err => console.warn(err)
     });
@@ -123,18 +121,7 @@ export default function BasicCard() {
                             </Typography>
                             {createLink(instance)} 
                         </Paper>
-                        <Snackbar 
-                            open={snackOpen}
-                            autoHideDuration={10000}
-                            onClose={handleClose}
-                            message={snackSeverity.message}
-                            action={action}
-                            sx={{ position: 'relative', top: 0}}
-                        >
-                            <Alert onClose={handleClose} severity={snackSeverity.severity} sx={{ width: '100%' }}>
-                                {snackSeverity.message}
-                            </Alert>
-                        </Snackbar>
+
                     </Grid>
                 ))
             }

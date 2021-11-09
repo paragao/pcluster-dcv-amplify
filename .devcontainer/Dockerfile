@@ -6,7 +6,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT} AS base
 
 # Install AWS Amplify && install Amazon Corretto for mocking environments locally
 RUN su node -c "npm install -g @aws-amplify/cli" 
-RUN  wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add - \
+RUN wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add - \
     && echo 'deb https://apt.corretto.aws stable main' >>/etc/apt/sources.list.d/corretto.list \
     && sudo apt update -y \
     && sudo apt install -y java-11-amazon-corretto-jdk 
